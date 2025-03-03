@@ -1,16 +1,13 @@
 import os
 import json
-import subprocess
 import sqlite3
-<<<<<<< HEAD
 import time
 import validators
 import requests
 import traceback
 import argparse
-=======
-import urllib
->>>>>>> cc7cb59 (its sqlite3)
+from functools import wraps
+from flask import abort
 
 from flask import Flask, jsonify, request
 
@@ -32,6 +29,14 @@ parser.add_argument('-p', '--port', type=int, default=5000, help='The port to li
 args = parser.parse_args()
 
 app = Flask(__name__)
+
+def local_only(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if request.remote_addr != '127.0.0.1':
+            abort(403)  # Forbidden
+        return f(*args, **kwargs)
+    return decorated_function
 
 # helper to get a database connection
 # use with database() as con:
@@ -146,13 +151,13 @@ def retrieve_state():
 # view the state
 # you can check on your sign
 @app.route(f"{API_URL}/state", methods=['GET'])
-def get_state():
+def http_get_state():
     return jsonify(retrieve_state())
 
 # lets a client set the state.
 # body: json boolean
 @app.route(f"{API_URL}/state", methods=['PUT'])
-def set_state():
+def http_put_state():
     old_state = retrieve_state()
     new_state = json.loads(request.data.decode('utf-8'))
 
@@ -168,7 +173,7 @@ def set_state():
 # returns current state so sign can set itself properly
 # body: json string, a url to json boolean state updates to
 @app.route(f"{API_URL}/register", methods=['POST'])
-def register():
+def http_post_sign():
     # get desired callback point (should parse to a url)
     client_text = json.loads(request.data.decode('utf-8'))
 
@@ -177,6 +182,13 @@ def register():
     current_state = retrieve_state()
 
     return jsonify(current_state)
+
+# list all registered signs
+# only accessible from localhost
+@app.route(f"{API_URL}/signs", methods=['GET'])
+@local_only
+def http_get_signs():
+    return jsonify(get_signs())
 
 if __name__ == '__main__':
     init_db()
