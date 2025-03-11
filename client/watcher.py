@@ -4,7 +4,7 @@ import requests
 import argparse
 import traceback
 import threading
-from lib.log_config import get_logger
+from lib.log_config import setup_logging
 
 logger = setup_logging()
 
