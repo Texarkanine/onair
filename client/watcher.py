@@ -4,6 +4,9 @@ import requests
 import argparse
 import traceback
 import threading
+from lib.log_config import get_logger
+
+logger = setup_logging()
 
 parser = argparse.ArgumentParser(
     prog='client.py',
