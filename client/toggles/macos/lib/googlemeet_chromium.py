@@ -2,10 +2,11 @@ import time
 import re
 from toggles.macos.lib import macos_utils
 from lib.log_config import get_logger  # Updated import path
+from typing import Callable, Optional
 
 logger = get_logger(__name__)
 
-def run_and_call(callback, browser_name, poll_interval_s=1, start_threshold=5, cpu_threshold=15):
+def run_and_call(callback: Callable[[bool], Optional[bool]], browser_name: str, poll_interval_s=1, start_threshold=5, cpu_threshold=15):
 
     on_call = False
 
@@ -61,7 +62,9 @@ def run_and_call(callback, browser_name, poll_interval_s=1, start_threshold=5, c
                         # google meet open AND a headset? That's a call!
                         logger.info("\t... and there's a bluetooth headset!")
                         logger.info("CALL STARTED")
-                        on_call = callback(True)
+                        result = callback(True)
+                        if result is not None:  # Only update state if callback succeeded
+                            on_call = result
                         continue
                     else:
                         logger.info(f"\t... with no headset! CPU Load: {cpu_data}")
@@ -70,7 +73,9 @@ def run_and_call(callback, browser_name, poll_interval_s=1, start_threshold=5, c
                             # google meet open, no headset, and high CPU? That's a call!
                             logger.info("\t... with high CPU!")
                             logger.info("CALL STARTED")
-                            on_call = callback(True)
+                            result = callback(True)
+                            if result is not None:  # Only update state if callback succeeded
+                                on_call = result
                             continue
             else:
                 # need to detect a call end
@@ -79,7 +84,9 @@ def run_and_call(callback, browser_name, poll_interval_s=1, start_threshold=5, c
                 if not google_meet_open:
                     # no google meet? no call!
                     logger.info("CALL ENDED")
-                    on_call = callback(False)
+                    result = callback(False)
+                    if result is not None:  # Only update state if callback succeeded
+                        on_call = result
                     continue
                 else:
                     # google meet is open. Are we just idling on the webpage?
@@ -89,7 +96,9 @@ def run_and_call(callback, browser_name, poll_interval_s=1, start_threshold=5, c
                             # google meet open, no headset, and low CPU? That's the end of a call!
                             logger.info("\t... with low CPU!")
                             logger.info("CALL ENDED")
-                            on_call = callback(False)
+                            result = callback(False)
+                            if result is not None:  # Only update state if callback succeeded
+                                on_call = result
                             continue
             
             if was_on_call == on_call:
