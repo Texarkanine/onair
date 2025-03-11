@@ -18,21 +18,34 @@ args = parser.parse_args()
 
 
 
-def changed_oncall(to: bool):
+def changed_oncall(to: bool) -> bool:
+    """
+    Notify the server about a change in call status.
+    
+    Args:
+        to: The new call status
+    Returns:
+        bool: The new status if successful, None if the update failed
+    """
     try:
-        requests.put(args.push, data=json.dumps(to), timeout=10)
-    except Exception as be:
-        print(traceback.format_exc())
-
+        response = requests.put(args.push, data=json.dumps(to), timeout=10)
+        response.raise_for_status()  # Raises HTTPError for bad status codes
+        logger.debug(f"Successfully updated call status to: {to}")
+    except requests.exceptions.HTTPError as he:
+        logger.error(f"HTTP error updating call status: {he}")
+    except requests.exceptions.RequestException as re:
+        logger.error(f"Network error updating call status: {re}")
+    except Exception as e:
+        logger.error(f"Unexpected error updating call status: {e}")
+        logger.debug(traceback.format_exc())  # Full traceback at debug level
+    
     return to
-    # TODO need to toggle better if fail
 
 threads = list()
 
 for toggle in args.toggle:
     print("Toggle selected: " + toggle)
     newmod = importlib.import_module(toggle)
-    # TODO: this is not parallel, can only work with one toggle for now
     t = threading.Thread(target=newmod.run_and_call, args=[changed_oncall])
     t.start()
     threads += [t]
