@@ -4,7 +4,8 @@ import subprocess
 import requests
 import argparse
 import socket
-import subprocess
+import threading
+import time
 
 from flask import Flask, jsonify, request
 
@@ -20,7 +21,7 @@ parser = argparse.ArgumentParser(
 )
 parser.add_argument('-r', '--register', type=str, help='The full server endpoint URL to register with for push updates.')
 parser.add_argument('-p', '--port', type=int, default=5000, help='The port to listen on')
-parser.add_argument('-t', '--host', type=str, help="The host or IP to register with the server for push  updates, if it isn't just our IP + port")
+parser.add_argument('-t', '--host', type=str, help="The host or IP to register with the server for push updates, if it isn't just our IP + port")
 parser.add_argument('-c', '--command', nargs=argparse.REMAINDER, type=str, help="Command to execute when toggled. @STATUS@, if present, will be replaced with `true' or `false'.")
 parser.add_argument('-i', '--idempotent', action='store_true', help="If it is safe to call the --command on every state update. If false (default), commands only run when state CHANGES according to the sign's own memory.")
 args, unknown = parser.parse_known_args()
@@ -43,10 +44,16 @@ def register(server:str, host:str, port: int):
     my_url = f"http://{host}:{port}{API_URL}/state"
     print(f"Registering {my_url} with server {server}...")
 
-    server_state = requests.post(f"{server}",json=my_url)
+    server_state = requests.post(f"{server}", json=my_url)
     server_state_json = server_state.json()
     state_change(retrieve_state(), server_state_json)
     return server_state_json
+
+# re-register this sign with a server every so often.
+def periodic_registration(server: str, host: str, port: int, every_x_seconds: int):
+    while True:
+        register(server, host, port)
+        time.sleep(every_x_seconds)
 
 # run the cmds when the state changes
 def run_state_cmds(new_state: bool):
@@ -54,9 +61,8 @@ def run_state_cmds(new_state: bool):
     print(commands)
     subprocess.call(commands)
 
-
 # change the server's state
-def state_change(old: bool, new:bool):
+def state_change(old: bool, new: bool):
     
     message = "offline"
     if new:
@@ -90,7 +96,7 @@ def retrieve_state():
 def get_state():
     return jsonify(retrieve_state())
 
-# llet you set the state
+# lets you set the state
 # body: json boolean
 @app.route(f"{API_URL}/state", methods=['PUT'])
 def set_state():
@@ -123,6 +129,6 @@ Toggle Commands:
     print(params)
 
     if args.register:
-        register(args.register, local_host, args.port)
+        threading.Thread(target=lambda: periodic_registration(args.register, local_host, args.port, 60)).start()
     
     app.run(debug=True, host="0.0.0.0", port=args.port)
