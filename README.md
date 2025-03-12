@@ -1,7 +1,7 @@
 IoT "On Air" Signs
 ==========
 
-This is a suite of sotware to enable internet-of-things "On Air" signs to indicate when you're "On Air" - in a meeting, on a video call, recording, or maybe even immersed in a video game and don't want to be interrupted.
+This is a suite of software to enable internet-of-things "On Air" signs to indicate when you're "On Air" - in a meeting, on a video call, recording, or maybe even immersed in a video game and don't want to be interrupted.
 
 There would be some small computer embedded in a sign and able to toggle it between "active" and "inactive" states.
 You can either have a single station (PC, laptop, etc) directly toggle a single sign, or you can put an "OnAir Server" in the middle to keep 1 or more signs in-sync with 1 or more stations.
