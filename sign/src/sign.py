@@ -53,7 +53,11 @@ def register(server:str, host:str, port: int):
 # re-register this sign with a server every so often.
 def periodic_registration(server: str, host: str, port: int, every_x_seconds: int):
     while True:
-        register(server, host, port)
+        try:
+            register(server, host, port)
+        except Exception as e:
+            print(f"Error during scheduled re-registration: {e}")
+        
         time.sleep(every_x_seconds)
 
 # run the cmds when the state changes
