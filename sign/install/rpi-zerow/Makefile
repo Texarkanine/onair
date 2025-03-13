@@ -7,7 +7,7 @@ PIPX_PATH=$(or $(shell which pipx),$(PIPX_DEFAULT_PATH))
 PYENV_DEFAULT_PATH=$(HOME)/.pyenv/bin/pyenv
 PYENV_PATH=$(or $(shell which pyenv),$(PYENV_DEFAULT_PATH))
 
-all: deps pyenv pipx #python # assume suitable python is already installed
+all: deps pyenv pipx #python # assume suitable python is already installed (building python takes a long time on an rpi-zerow)
 	$(MAKE) pipenv
 
 print-vars:

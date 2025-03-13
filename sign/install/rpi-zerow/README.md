@@ -6,7 +6,8 @@ Raspberry Pi Zero W
 1. Use the Raspberry Pi Imager to install a Debian-based Raspberry Pi OS
 	* e.g. `Raspberry Pi OS (Legacy, 32-bit) Lite`
 2. Run `make` to prepare the pi
-3. You may now run `pipenv run python ./sign.py` from the `src` directory
+3. Run `pipenv install` from the `src` directory.
+4. You may now run `pipenv run python ./sign.py` from the `src` directory.
 
 Installing as a Systemd Service
 ==============================
