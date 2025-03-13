@@ -24,6 +24,7 @@ parser.add_argument('-p', '--port', type=int, default=5000, help='The port to li
 parser.add_argument('-t', '--host', type=str, help="The host or IP to register with the server for push updates, if it isn't just our IP + port")
 parser.add_argument('-c', '--command', nargs=argparse.REMAINDER, type=str, help="Command to execute when toggled. @STATUS@, if present, will be replaced with `true' or `false'.")
 parser.add_argument('-i', '--idempotent', action='store_true', help="If it is safe to call the --command on every state update. If false (default), commands only run when state CHANGES according to the sign's own memory.")
+parser.add_argument('-u', '--register-interval', type=int, default=60, help='Interval in seconds for re-registering with the server. 0 means no re-registration.')
 args, unknown = parser.parse_known_args()
 
 app = Flask(__name__)
@@ -124,11 +125,15 @@ Toggle Commands:
     ON : {on_command}
     OFF: {off_command}
     idempotent? {args.idempotent}
+    Re-registration Interval: {args.register_interval} seconds
 """
 
     print(params)
 
     if args.register:
-        threading.Thread(target=lambda: periodic_registration(args.register, local_host, args.port, 60)).start()
+        if( args.register_interval > 0 ):
+            threading.Thread(target=lambda: periodic_registration(args.register, local_host, args.port, args.register_interval)).start()
+        else:
+            register(args.register, local_host, args.port)
     
     app.run(debug=True, host="0.0.0.0", port=args.port)
