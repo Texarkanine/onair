@@ -30,12 +30,33 @@ args, unknown = parser.parse_known_args()
 app = Flask(__name__)
 
 def get_local_ip():
+    # Try to get the IP address by connecting to a public DNS server
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     try:
-        s.connect(('192.255.255.255', 1))
+        # Try connecting to Google's DNS server
+        s.connect(('8.8.8.8', 80))
         IP = s.getsockname()[0]
     except:
-        IP = '127.0.0.1'
+        # If that fails, try to get the IP from the hostname
+        try:
+            # Get the hostname
+            hostname = socket.gethostname()
+            # Get the IP address associated with the hostname
+            IP = socket.gethostbyname(hostname)
+            # If it's still localhost, try to get all IPs associated with the hostname
+            if IP == '127.0.0.1':
+                # Get all IPs associated with the hostname
+                addrs = socket.getaddrinfo(hostname, None)
+                for addr in addrs:
+                    # addr is a 5-tuple: (family, type, proto, canonname, sockaddr)
+                    # sockaddr is a tuple containing the actual address information
+                    sockaddr = addr[4]  # Get the sockaddr tuple
+                    ip = sockaddr[0]    # First element of sockaddr is the IP address
+                    if ip != '127.0.0.1':  # Skip localhost
+                        IP = ip
+                        break
+        except:
+            IP = '127.0.0.1'
     finally:
         s.close()
     return IP
