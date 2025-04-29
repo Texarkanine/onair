@@ -67,7 +67,6 @@ def state_change(old: bool, new: bool):
 
 # register a new sign for push notifications
 def register_sign(url, state):
-
     validators.url(url)
 
     data = {
@@ -79,7 +78,13 @@ def register_sign(url, state):
         cur = con.cursor()
 
         if state:
-            cur.execute("INSERT INTO signs(url, registered_ts) VALUES (:url, :date) ON CONFLICT(url) DO UPDATE SET registered_ts=:date", data)
+            cur.execute("""
+                INSERT INTO signs(url, registered_ts, last_successful_ts) 
+                VALUES (:url, :date, :date) 
+                ON CONFLICT(url) DO UPDATE SET 
+                    registered_ts=:date,
+                    last_successful_ts=:date
+            """, data)
             print(f"Registered a sign at {url}")
         else:
             cur.execute("DELETE FROM signs WHERE url=:url", data)
