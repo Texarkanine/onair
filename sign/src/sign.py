@@ -63,7 +63,9 @@ def get_local_ip():
 
 # register this sign with a server
 def register(server:str, host:str, port: int):
-    my_url = f"http://{host}:{port}{API_URL}/state"
+    # Get current callback host each time we register
+    callback_host = get_local_ip() if host is None else host
+    my_url = f"http://{callback_host}:{port}{API_URL}/state"
     print(f"Registering {my_url} with server {server}...")
 
     server_state = requests.post(f"{server}", json=my_url)
