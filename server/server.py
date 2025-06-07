@@ -111,9 +111,16 @@ def notify_signs(signs: list, state: bool):
         response = None
         print(f"Notifying sign at {sign['url']}...")
         try:
-            response = requests.put(sign['url'], json=state)
+            response = requests.put(sign['url'], json=state, timeout=10) # 10 second timeout
             print(f"    ... notified sign at {sign['url']}")
         except BaseException as be:
+            if isinstance(be, requests.exceptions.Timeout):
+                print(f"    Sign {sign['url']} timed out after 10 seconds")
+            elif isinstance(be, requests.exceptions.RequestException):
+                print(f"    Network error for sign {sign['url']}: {be}")
+            else:
+                print(f"    Unexpected error for sign {sign['url']}: {be}")
+            
             print(traceback.format_exc())
             if sign['num_failures'] + 1 >= MAX_FAILURES:
                 print(f"    Dropping sign {sign['url']}; it has failed too many ({sign['num_failures']+1}) times.")
