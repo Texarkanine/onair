@@ -1,0 +1,1 @@
+Slack huddle info lines use the same CALL STARTED / CALL ENDED / Still on a call... / Not on a call... text as the other macOS toggles; inspector dump stays debug.
