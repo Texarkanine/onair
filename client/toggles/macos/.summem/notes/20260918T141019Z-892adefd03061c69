@@ -1,0 +1,1 @@
+Slack huddle inspector must set AXManualAccessibility via AXUIElementSetAttributeValue; System Events AppleScript cannot, so ctypes stays the no-Swift path.

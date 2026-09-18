@@ -1,0 +1,1 @@
+AXManualAccessibility set can return AttributeUnsupported and still work; fail the inspector only on other AXErrors when AXWindows is empty.
