@@ -15,6 +15,7 @@ _AX = ctypes.cdll.LoadLibrary(ctypes.util.find_library("ApplicationServices"))
 
 kCFStringEncodingUTF8 = 0x08000100
 kAXErrorSuccess = 0
+kAXErrorAttributeUnsupported = -25205
 
 _CF.CFStringCreateWithCString.argtypes = [c_void_p, c_char_p, c_uint32]
 _CF.CFStringCreateWithCString.restype = c_void_p
@@ -244,10 +245,19 @@ def inspect_slack_huddle() -> dict:
         return report
 
     try:
-        _AX.AXUIElementSetAttributeValue(app_ref, _AX_MANUAL, _kCFBooleanTrue)
+        # Electron has returned AttributeUnsupported here even when the set worked.
+        err = _AX.AXUIElementSetAttributeValue(app_ref, _AX_MANUAL, _kCFBooleanTrue)
 
         report["ax_windows"] = _array_count(app_ref, _AX_WINDOWS)
         report["inspectable"] = report["ax_windows"] > 0
+        if (
+            err != kAXErrorSuccess
+            and err != kAXErrorAttributeUnsupported
+            and not report["inspectable"]
+        ):
+            report["ok"] = False
+            report["error"] = f"ax_manual_failed:{err}"
+            return report
         if _any_window_huddle_title(app_ref):
             report["huddle"] = True
             return report
