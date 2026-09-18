@@ -84,22 +84,22 @@ def run_and_call(
 
             if not on_call:
                 if start_hits >= start_threshold:
-                    log_huddle("Slack huddle started", detail)
+                    log_huddle("CALL STARTED", detail)
                     result = callback(True)
                     if result is not None:
                         on_call = result
             else:
                 if stop_hits >= stop_threshold:
-                    log_huddle("Slack huddle ended", detail)
+                    log_huddle("CALL ENDED", detail)
                     result = callback(False)
                     if result is not None:
                         on_call = result
 
             if was_on_call == on_call:
                 if on_call:
-                    log_huddle("Still in a Slack huddle", detail)
+                    log_huddle("Still on a call...", detail)
                 else:
-                    log_huddle("Not in a Slack huddle", detail)
+                    log_huddle("Not on a call...", detail)
 
             time.sleep(poll_interval_s)
 

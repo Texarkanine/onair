@@ -54,7 +54,7 @@ class ObservationKindTests(unittest.TestCase):
 class LogHuddleTests(unittest.TestCase):
     def test_info_is_short_and_detail_is_debug(self):
         """Info stays human-readable; the field dump goes to debug."""
-        message = "Still in a Slack huddle"
+        message = "Still on a call..."
         detail = (
             "running=True huddle=False inspectable=False ax_windows=0 "
             "(start 3/3, stop 0/3)"
@@ -102,9 +102,15 @@ class RunAndCallTests(unittest.TestCase):
         with patch(
             "toggles.macos.slack_huddle.inspect_slack_huddle", side_effect=inspect
         ), patch("toggles.macos.slack_huddle.time.sleep"):
-            with self.assertRaises(KeyboardInterrupt):
-                run_and_call(
-                    callback, poll_interval_s=0, start_threshold=3, stop_threshold=3
-                )
+            with self.assertLogs("toggles.macos.slack_huddle", level="INFO") as captured:
+                with self.assertRaises(KeyboardInterrupt):
+                    run_and_call(
+                        callback, poll_interval_s=0, start_threshold=3, stop_threshold=3
+                    )
 
         self.assertEqual(calls, [True, False])
+        messages = [record.getMessage() for record in captured.records]
+        self.assertIn("CALL STARTED", messages)
+        self.assertIn("CALL ENDED", messages)
+        self.assertIn("Still on a call...", messages)
+        self.assertIn("Not on a call...", messages)
