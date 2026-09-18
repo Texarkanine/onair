@@ -11,6 +11,30 @@ from toggles.macos.lib.slack_huddle_ax import inspect_slack_huddle
 logger = get_logger(__name__)
 
 
+def observation_kind(running, huddle, inspectable, ax_windows):
+    """
+    Classify one inspector report for the huddle poll loop.
+
+    absent: Slack is not running.
+    huddle: a huddle is visible.
+    clear: no huddle, and this look is decisive (including zero AX windows).
+    hold: Slack is running but the tree was not readable.
+    """
+    if not running:
+        return "absent"
+    if huddle:
+        return "huddle"
+    if inspectable or ax_windows == 0:
+        return "clear"
+    return "hold"
+
+
+def log_huddle(message, detail):
+    """Log a short human-readable info line; put inspector fields on debug."""
+    logger.info(message)
+    logger.debug(detail)
+
+
 def run_and_call(
     callback: Callable[[bool], Optional[bool]],
     poll_interval_s=2,
@@ -34,47 +58,48 @@ def run_and_call(
             running = bool(report.get("running"))
             huddle = bool(report.get("huddle"))
             inspectable = bool(report.get("inspectable"))
+            ax_windows = int(report.get("ax_windows") or 0)
+            kind = observation_kind(running, huddle, inspectable, ax_windows)
             detail = (
                 f"running={running} huddle={huddle} inspectable={inspectable} "
-                f"ax_windows={report.get('ax_windows')} "
+                f"ax_windows={ax_windows} "
                 f"(start {start_hits}/{start_threshold}, stop {stop_hits}/{stop_threshold})"
             )
 
-            if not running:
-                # Slack is not running. A huddle on this Mac is not possible.
-                start_hits = 0
-                stop_hits = stop_threshold
-            elif huddle:
-                start_hits = min(start_threshold, start_hits + 1)
-                stop_hits = 0
-            elif inspectable:
-                start_hits = 0
-                stop_hits = min(stop_threshold, stop_hits + 1)
-            else:
-                # Slack is running. The UI is not readable (other Space).
-                # Keep the last confirmed state. Do not activate Slack.
-                logger.info(f"Slack huddle unreadable (holding state): {detail}")
+            if kind == "hold":
+                # Windows exist but the walk did not finish. Keep the last confirmed
+                # state. Do not activate Slack.
+                log_huddle("Slack huddle unreadable (holding state)", detail)
                 time.sleep(poll_interval_s)
                 continue
+            if kind == "absent":
+                start_hits = 0
+                stop_hits = stop_threshold
+            elif kind == "huddle":
+                start_hits = min(start_threshold, start_hits + 1)
+                stop_hits = 0
+            else:
+                start_hits = 0
+                stop_hits = min(stop_threshold, stop_hits + 1)
 
             if not on_call:
                 if start_hits >= start_threshold:
-                    logger.info(f"Slack huddle started: {detail}")
+                    log_huddle("Slack huddle started", detail)
                     result = callback(True)
                     if result is not None:
                         on_call = result
             else:
                 if stop_hits >= stop_threshold:
-                    logger.info(f"Slack huddle ended: {detail}")
+                    log_huddle("Slack huddle ended", detail)
                     result = callback(False)
                     if result is not None:
                         on_call = result
 
             if was_on_call == on_call:
                 if on_call:
-                    logger.info(f"Still in a Slack huddle: {detail}")
+                    log_huddle("Still in a Slack huddle", detail)
                 else:
-                    logger.info(f"Not in a Slack huddle: {detail}")
+                    log_huddle("Not in a Slack huddle", detail)
 
             time.sleep(poll_interval_s)
 

@@ -1,11 +1,13 @@
 # Active Context
 
 ## Current Task: slack-huddle-leave-off
-**Phase:** BUILD - IN-PROGRESS
+**Phase:** BUILD - COMPLETE
 
 ## What Was Done
-- Corrected intent: after Leave the inspector stays at `running=true huddle=false inspectable=false ax_windows=0` and the toggle holds on-air.
-- Classified Level 1: bug fix in a single component (macOS Slack huddle toggle), plus matching info/debug log split.
+- Leave with `running=true huddle=false inspectable=false ax_windows=0` now counts toward ending the huddle.
+- Hold is only for an unreadable tree that still has windows.
+- Info lines are short; the field dump is debug.
+- 7 stdlib tests in `client/toggles/macos/test_slack_huddle.py` pass.
 
 ## Next Step
-- Locate root cause, write a failing test, then fix hold-on-empty-windows and info/debug logging.
+- Level 1 QA (`/niko-qa` in a subagent).

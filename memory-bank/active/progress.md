@@ -14,9 +14,15 @@ Fix the macOS Slack huddle toggle so Leave actually ends the call when Slack is 
 * Insights
     - The stuck signature is the toggle's "unreadable / hold" branch, not a leftover `huddle=true`
 
-## 2026-09-18 - BUILD - IN-PROGRESS
+## 2026-09-18 - BUILD - COMPLETE
 
 * Work completed
-    - Leaving complexity analysis; starting Level 1 build
+    - Empty AXWindows after Leave is `clear` (counts toward off), not hold
+    - Hold remains only when windows exist and the walk is unreadable
+    - Info logs are short; inspector/hysteresis dump is debug
+    - Added stdlib unittest coverage for observation kind, log split, and Leave callback
 * Decisions made
-    - None yet
+    - Treat `ax_windows=0` as a decisive miss, matching the observed Leave signature
+    - Use stdlib unittest next to the toggle; no new test runner dependency
+* Insights
+    - The previous other-Space hold used the same empty-window signature as Leave, so Leave could never end the call
