@@ -37,7 +37,7 @@ def run_and_call(
             detail = (
                 f"running={running} huddle={huddle} inspectable={inspectable} "
                 f"ax_windows={report.get('ax_windows')} "
-                f"signals={report.get('signals')} (start {start_hits}/{start_threshold}, stop {stop_hits}/{stop_threshold})"
+                f"(start {start_hits}/{start_threshold}, stop {stop_hits}/{stop_threshold})"
             )
 
             if not running:

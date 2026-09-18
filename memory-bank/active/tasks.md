@@ -29,7 +29,7 @@ No new executable behavior. Cleanup must not change these existing behaviors (re
 
 ## Implementation Plan
 
-### 1. Strip dead inspector surface — executable
+### 1. Strip dead inspector surface — executable — done
 
 - Files: `client/toggles/macos/lib/slack_huddle_ax.py`
 - No tests: operator constraint (no runner, no Slack). TDD substages 1–3 skipped.
@@ -45,7 +45,7 @@ No new executable behavior. Cleanup must not change these existing behaviors (re
     - Keep: `AXIsProcessTrusted`, `pgrep -x Slack`, `AXUIElementSetAttributeValue` for `AXManualAccessibility`, `AXWindows` count for inspectable, CF retain/release, do not activate Slack
     - One-line comment that System Events AppleScript cannot set `AXManualAccessibility`
 
-### 2. Match the toggle to the thinner report — executable
+### 2. Match the toggle to the thinner report — executable — done
 
 - Files: `client/toggles/macos/slack_huddle.py`
 - No tests: same operator constraint. TDD substages 1–3 skipped.
@@ -58,7 +58,7 @@ No new executable behavior. Cleanup must not change these existing behaviors (re
     - Log the remaining report fields only
     - Do not reshape the poll loop to a new pattern; sibling toggles already look like this
 
-### 3. AppleScript verdict — prose/policy
+### 3. AppleScript verdict — prose/policy — done
 
 - Files: `memory-bank/active/progress.md` (and the inspector comment in step 1)
 - No tests: prose/policy artifact
@@ -99,6 +99,6 @@ AppleScript was considered as a ctypes replacement. It is already used in this r
 - [x] Implementation plan complete
 - [x] Technology validation complete
 - [x] Pre-Mortem complete
-- [ ] Preflight
-- [ ] Build
+- [x] Preflight
+- [x] Build
 - [ ] QA

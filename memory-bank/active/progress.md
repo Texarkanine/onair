@@ -39,3 +39,15 @@ Clean unused and overbuilt code out of the macOS Slack Huddle detector pair. Kee
 * Insights
     - `flags["leave"]` is live (half the huddle OR); plan step 1's "delete the flags dict" means replace-with-direct-huddle-tracking, not drop leave detection
     - The signals/early-exit reshape is the only logic-bearing hunk; isolating it from the pure deletions would ease review-only verification
+
+## 2026-09-18 - BUILD - COMPLETE
+
+* Work completed
+    - Deleted unread inspector surface; leave-button detection kept via direct huddle tracking
+    - Toggle log no longer prints `signals`
+    - `python -m py_compile` on both files; no test suite or linter in this repo
+* Decisions made
+    - No `__main__` smoke (advisory 3): task is deletion; operator can run `inspect_slack_huddle()` on a Slack machine if wanted
+    - One walk rewrite rather than two hunks: dropping `signals` is the early-exit walk
+* Insights
+    - ctypes argtypes stay; they are the Accessibility C API, not leftover abstraction

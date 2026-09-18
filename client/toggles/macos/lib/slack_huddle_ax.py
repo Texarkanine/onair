@@ -1,6 +1,7 @@
 # Read Slack huddle UI through the macOS Accessibility C API (ctypes).
 # The process that starts this toggle must have Accessibility permission.
 # Slack is Electron. The AX tree is empty until AXManualAccessibility is true.
+# System Events AppleScript cannot set that attribute; this file calls the C API.
 # Slack English UI labels. A localized Slack client does not match.
 # This inspector does not activate Slack.
 
@@ -45,6 +46,7 @@ _AX.AXUIElementCopyAttributeValue.restype = c_int32
 
 _kCFBooleanTrue = c_void_p.in_dll(_CF, "kCFBooleanTrue")
 
+
 def _cfstr(text: str):
     return _CF.CFStringCreateWithCString(None, text.encode("utf-8"), kCFStringEncodingUTF8)
 
@@ -55,10 +57,6 @@ _AX_DESC = _cfstr("AXDescription")
 _AX_CHILDREN = _cfstr("AXChildren")
 _AX_WINDOWS = _cfstr("AXWindows")
 _AX_MANUAL = _cfstr("AXManualAccessibility")
-
-# Observed Slack huddle controls (English). "Start huddle" is not an active huddle.
-_HUDDLE_TOOLBARS = {"huddle window actions", "huddles actions"}
-_LEAVE_HUDDLE = {"leave huddle"}
 
 
 def _cfstring_to_str(ref):
@@ -139,9 +137,9 @@ def _slack_pid():
     return pids[0] if pids else None
 
 
-def _walk(element, depth, budget, signals, flags):
+def _huddle_in(element, depth, budget):
     if depth > 20 or budget[0] <= 0:
-        return
+        return False
     budget[0] -= 1
 
     role = _copy_str(element, _AX_ROLE) or ""
@@ -149,26 +147,21 @@ def _walk(element, depth, budget, signals, flags):
     description = _copy_str(element, _AX_DESC)
 
     if _normalized(title).startswith("huddle:"):
-        signal = f"title:{title}"
-        if signal not in signals:
-            signals.append(signal)
-    if role == "AXToolbar" and _normalized(description) in _HUDDLE_TOOLBARS:
-        flags["toolbar"] = True
-        signal = f"toolbar:{description}"
-        if signal not in signals:
-            signals.append(signal)
+        return True
     if role == "AXButton" and (
-        _normalized(title) in _LEAVE_HUDDLE or _normalized(description) in _LEAVE_HUDDLE
+        _normalized(title) == "leave huddle" or _normalized(description) == "leave huddle"
     ):
-        flags["leave"] = True
-        if "leave" not in signals:
-            signals.append("leave")
+        return True
 
-    _walk_children(
-        element,
-        _AX_CHILDREN,
-        lambda child: _walk(child, depth + 1, budget, signals, flags),
-    )
+    found = False
+
+    def visit(child):
+        nonlocal found
+        if not found:
+            found = _huddle_in(child, depth + 1, budget)
+
+    _walk_children(element, _AX_CHILDREN, visit)
+    return found
 
 
 def inspect_slack_huddle() -> dict:
@@ -176,10 +169,8 @@ def inspect_slack_huddle() -> dict:
         "ok": True,
         "running": False,
         "ax_windows": 0,
-        "named_windows": 0,
         "inspectable": False,
         "huddle": False,
-        "signals": [],
         "error": None,
     }
 
@@ -203,18 +194,8 @@ def inspect_slack_huddle() -> dict:
         _AX.AXUIElementSetAttributeValue(app_ref, _AX_MANUAL, _kCFBooleanTrue)
 
         report["ax_windows"] = _array_count(app_ref, _AX_WINDOWS)
-
-        signals = []
-        flags = {"toolbar": False, "leave": False}
-        _walk(app_ref, 0, [3000], signals, flags)
-
-        report["signals"] = signals
         report["inspectable"] = report["ax_windows"] > 0
-        # A huddle is active if a window title starts with "Huddle:" or a Leave Huddle button exists.
-        report["huddle"] = (
-            any(s.startswith("title:") for s in signals)
-            or flags["leave"]
-        )
+        report["huddle"] = _huddle_in(app_ref, 0, [3000])
         return report
     finally:
         _CF.CFRelease(app_ref)

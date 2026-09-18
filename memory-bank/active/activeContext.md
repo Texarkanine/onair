@@ -1,11 +1,12 @@
 # Active Context
 
 ## Current Task: slack-huddle-cleanup
-**Phase:** PREFLIGHT - COMPLETE (PASS WITH ADVISORY)
+**Phase:** BUILD - COMPLETE
 
 ## What Was Done
-- Level 2 plan: delete unread inspector surface (named_windows, toolbar flags, signals list), keep ctypes + AXManualAccessibility, match the toggle logs to the thinner report.
-- AppleScript rejected as a replacement: System Events cannot set Electron `AXManualAccessibility`. No sibling files.
+- Cleaned `client/toggles/macos/lib/slack_huddle_ax.py`: dropped `named_windows`, toolbar matching, and the signals list; walk returns huddle directly (title `Huddle:` or Leave huddle button) and stops at first hit.
+- Cleaned `client/toggles/macos/slack_huddle.py` log line to match. Hysteresis, Space-hold, and callback-`None` handling unchanged.
+- AppleScript not added. Comment records that System Events cannot set `AXManualAccessibility`.
 
 ## Next Step
-- Build the cleanup (leave-button detection stays; no AppleScript sibling; no `__main__` smoke).
+- QA review.
