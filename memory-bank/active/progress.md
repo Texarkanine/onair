@@ -26,3 +26,14 @@ Fix the macOS Slack huddle toggle so Leave actually ends the call when Slack is 
     - Use stdlib unittest next to the toggle; no new test runner dependency
 * Insights
     - The previous other-Space hold used the same empty-window signature as Leave, so Leave could never end the call
+
+## 2026-09-18 - QA - COMPLETE (PASS)
+
+* Work completed
+    - Semantic review of `slack_huddle.py` + tests against the brief: no blocking findings
+    - Confirmed classifier matches inspector semantics (`ax_windows=0` = completed look; `ax_windows>0` + uninspectable = exhausted walk)
+    - Re-ran suite: 7 tests, OK
+* Decisions made
+    - PASS with two advisories: Leave vs other-Space ambiguity is a deliberate plan tradeoff; `or 0` coercion is harmless
+* Insights
+    - `inspectable` in the inspector is derived from `ax_windows` and the walk budget, so the classifier's four kinds partition the inspector's outputs exactly
