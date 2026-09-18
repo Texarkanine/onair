@@ -25,3 +25,4 @@ The shared API prefix is assembled as `/onair/api` + `v1` in `server/server.py` 
 ## Testing Process
 
 There is no test suite or test runner in this repository yet. When tests exist, follow `.cursor/rules/shared/always-tdd.mdc` and `.cursor/rules/shared/test-running-practices.mdc`.
+

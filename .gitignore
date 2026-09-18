@@ -161,3 +161,6 @@ cython_debug/
 onair.db
 onair-state.dat
 
+# SumMem
+**/.summem/__pycache__/
+
