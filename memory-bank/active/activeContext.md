@@ -1,7 +1,7 @@
 # Active Context
 
 ## Current Task: slack-huddle-cleanup
-**Phase:** BUILD - COMPLETE
+**Phase:** QA - COMPLETE (PASS)
 
 ## What Was Done
 - Cleaned `client/toggles/macos/lib/slack_huddle_ax.py`: dropped `named_windows`, toolbar matching, and the signals list; walk returns huddle directly (title `Huddle:` or Leave huddle button) and stops at first hit.
@@ -9,4 +9,4 @@
 - AppleScript not added. Comment records that System Events cannot set `AXManualAccessibility`.
 
 ## Next Step
-- QA review.
+- Proceed to `/niko-reflect`.

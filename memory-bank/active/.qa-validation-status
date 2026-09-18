@@ -1,0 +1,2 @@
+PASS
+Semantic QA passed: the cleanup removes only unused report and matching surface while preserving title/Leave-button detection, Accessibility setup, inspectability handling, hysteresis, and callback failure behavior.

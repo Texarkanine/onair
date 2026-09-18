@@ -101,4 +101,12 @@ AppleScript was considered as a ctypes replacement. It is already used in this r
 - [x] Pre-Mortem complete
 - [x] Preflight
 - [x] Build
-- [ ] QA
+- [x] QA
+
+## QA Results
+
+**Verdict:** PASS
+
+- The inspector's smaller report has no remaining consumers of the removed fields, and title/Leave-button matching remains equivalent to the prior active-huddle predicate.
+- Accessibility setup, non-activation, AX window inspectability, debounce, unreadable-Space hold, and `callback(None)` handling remain intact.
+- Static verification passed: `python -m py_compile` and `git diff --check`. Live Slack validation is unavailable under the documented operator constraint.
