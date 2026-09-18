@@ -27,3 +27,15 @@ Clean unused and overbuilt code out of the macOS Slack Huddle detector pair. Kee
 * Insights
     - System Events errors on `AXManualAccessibility` because the attribute is not in AXUIElementCopyAttributeNames, so the set is never attempted
     - Electron documents only AXUIElementSetAttributeValue (ObjC/Swift/C) for that attribute
+
+## 2026-09-18 - PREFLIGHT - COMPLETE
+
+* Work completed
+    - Ran all default-preflight checks against the code; verified every dead-code claim and traced all report-field consumers
+    - Result: PASS WITH ADVISORY (first line of `memory-bank/active/.preflight-status`)
+* Decisions made
+    - TDD deviation passes: operator constraint (no runner, no Slack, "do not add tests") is the documented always-tdd Step 1.3 answer, not a disclaimer
+    - AppleScript rejection satisfies acceptance criterion 2; no side-by-side files required
+* Insights
+    - `flags["leave"]` is live (half the huddle OR); plan step 1's "delete the flags dict" means replace-with-direct-huddle-tracking, not drop leave detection
+    - The signals/early-exit reshape is the only logic-bearing hunk; isolating it from the pure deletions would ease review-only verification
