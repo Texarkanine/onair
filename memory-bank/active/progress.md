@@ -61,3 +61,14 @@ Clean unused and overbuilt code out of the macOS Slack Huddle detector pair. Kee
     - Cleanup is acceptable as-is; no Build rerun is required
 * Insights
     - Huddle matching remains title-or-Leave-button; the direct boolean walk avoids collecting unused diagnostic signals
+
+## 2026-09-18 - REFLECT - COMPLETE
+
+* Work completed
+    - Wrote `memory-bank/active/reflection/reflection-slack-huddle-cleanup.md`
+    - Reconciled persistent files (no updates)
+* Decisions made
+    - None new; AppleScript rejection and ctypes keep stand
+* Insights
+    - Plan language "delete the flags dict" was unsafe because `leave` was live; say "replace" when a dict mixes dead and live keys
+
