@@ -24,5 +24,5 @@ The shared API prefix is assembled as `/onair/api` + `v1` in `server/server.py` 
 
 ## Testing Process
 
-There is no test suite or test runner in this repository yet. When tests exist, follow `.cursor/rules/shared/always-tdd.mdc` and `.cursor/rules/shared/test-running-practices.mdc`.
+The client macOS Slack huddle toggle has stdlib unittest modules next to the code. From `client/`, run `python3 -m unittest toggles.macos.test_slack_huddle`. Server and sign have no tests. Follow `.cursor/rules/shared/always-tdd.mdc` and `.cursor/rules/shared/test-running-practices.mdc`.
 
