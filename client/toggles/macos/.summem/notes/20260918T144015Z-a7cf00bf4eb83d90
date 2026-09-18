@@ -1,0 +1,1 @@
+Huddle inspector scans AXWindows titles first; a DFS that blows the node budget is unreadable (hold state), not huddle=false.

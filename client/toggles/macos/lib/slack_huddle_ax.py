@@ -137,8 +137,21 @@ def _slack_pid():
     return pids[0] if pids else None
 
 
+def _is_huddle_title(value):
+    return _normalized(value).startswith("huddle:")
+
+
+def _is_leave_huddle(role, title, description):
+    return role == "AXButton" and (
+        _normalized(title) == "leave huddle" or _normalized(description) == "leave huddle"
+    )
+
+
 def _huddle_in(element, depth, budget):
-    if depth > 20 or budget[0] <= 0:
+    # True = huddle, False = finished miss, None = search budget exhausted.
+    if budget[0] <= 0:
+        return None
+    if depth > 20:
         return False
     budget[0] -= 1
 
@@ -146,22 +159,62 @@ def _huddle_in(element, depth, budget):
     title = _copy_str(element, _AX_TITLE)
     description = _copy_str(element, _AX_DESC)
 
-    if _normalized(title).startswith("huddle:"):
-        return True
-    if role == "AXButton" and (
-        _normalized(title) == "leave huddle" or _normalized(description) == "leave huddle"
-    ):
+    if _is_huddle_title(title) or _is_leave_huddle(role, title, description):
         return True
 
     found = False
+    exhausted = False
 
     def visit(child):
-        nonlocal found
-        if not found:
-            found = _huddle_in(child, depth + 1, budget)
+        nonlocal found, exhausted
+        if found:
+            return
+        result = _huddle_in(child, depth + 1, budget)
+        if result is True:
+            found = True
+        elif result is None:
+            exhausted = True
 
     _walk_children(element, _AX_CHILDREN, visit)
+    if found:
+        return True
+    if exhausted:
+        return None
+    return False
+
+
+def _any_window_huddle_title(app_ref):
+    found = False
+
+    def visit(window):
+        nonlocal found
+        if not found and _is_huddle_title(_copy_str(window, _AX_TITLE)):
+            found = True
+
+    _walk_children(app_ref, _AX_WINDOWS, visit)
     return found
+
+
+def _huddle_in_windows(app_ref, budget):
+    found = False
+    exhausted = False
+
+    def visit(window):
+        nonlocal found, exhausted
+        if found:
+            return
+        result = _huddle_in(window, 0, budget)
+        if result is True:
+            found = True
+        elif result is None:
+            exhausted = True
+
+    _walk_children(app_ref, _AX_WINDOWS, visit)
+    if found:
+        return True
+    if exhausted:
+        return None
+    return False
 
 
 def inspect_slack_huddle() -> dict:
@@ -195,7 +248,14 @@ def inspect_slack_huddle() -> dict:
 
         report["ax_windows"] = _array_count(app_ref, _AX_WINDOWS)
         report["inspectable"] = report["ax_windows"] > 0
-        report["huddle"] = _huddle_in(app_ref, 0, [3000])
+        if _any_window_huddle_title(app_ref):
+            report["huddle"] = True
+            return report
+        verdict = _huddle_in_windows(app_ref, [3000])
+        if verdict is True:
+            report["huddle"] = True
+        elif verdict is None:
+            report["inspectable"] = False
         return report
     finally:
         _CF.CFRelease(app_ref)
