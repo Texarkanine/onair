@@ -1,10 +1,11 @@
 # Active Context
 
 ## Current Task: slack-huddle-cleanup
-**Phase:** COMPLEXITY-ANALYSIS - COMPLETE
+**Phase:** PLAN - COMPLETE
 
 ## What Was Done
-- Level 2 determined: cleanup of one self-contained toggle pair plus an AppleScript spike in sibling files, not a new feature or architecture change.
+- Level 2 plan: delete unread inspector surface (named_windows, toolbar flags, signals list), keep ctypes + AXManualAccessibility, match the toggle logs to the thinner report.
+- AppleScript rejected as a replacement: System Events cannot set Electron `AXManualAccessibility`. No sibling files.
 
 ## Next Step
-- Load the Level 2 workflow and start the plan phase.
+- Preflight validation of the plan.
